@@ -65,7 +65,7 @@ React, TypeScript, Vite, Zustand, Tailwind CSS, Three.js for the 3D opening, Rem
 
 **Tools:** Claude (Anthropic) through Claude Code, for code, tests and drafts. Antigravity (Google DeepMind), for some simulation modules and the PWA. ChatGPT image generation (OpenAI), for the character and welcome artwork.
 
-**Why and how:** a small student team had about two weeks, so AI sped up boilerplate, tests and first drafts. We gave it short, specific tasks, then reviewed the result, ran unit tests, and checked each fact against the NASA or NOAA page. Example task: "write a pure function that maps Kp, CME speed and SEP to a storm size, with tests."
+**Why and how:** a small student team had about two days, so AI sped up boilerplate, tests and first drafts. We gave it short, specific tasks, then reviewed the result, ran unit tests, and checked each fact against the NASA or NOAA page. Example task: "write a pure function that maps Kp, CME speed and SEP to a storm size, with tests."
 
 **Data the AI worked on:** the NASA and NOAA readings in `public/data` (storm size and speed-tier logic), and fact-checking text against the source pages.
 

@@ -1,13 +1,24 @@
 // CrewReady Offline Service Worker — BUILD_SEQUENCE.md D2a
 // Caches application shell, public/data snapshots, art, and assets for 100% offline play.
 
-const CACHE_NAME = 'crewready-v1';
+// The build (vite.config.ts) fills in the build id and the list of hashed JS, CSS and font files below, so the
+// worker can precache them: one online visit is enough to play offline. In dev they stay empty.
+const BUILD_ID = '__BUILD_ID__';
+const BUILD_ASSETS = [/*__BUILD_ASSETS__*/];
+const CACHE_NAME = `crewready-${BUILD_ID}`;
+// The dev and preview servers send Vary: Origin; ignore it so precached files always match.
+const MATCH = { ignoreVary: true };
 
 const PRECACHE_URLS = [
   './',
   'index.html',
   'manifest.json',
   'icon.svg',
+  'icon-192.png',
+  'icon-512.png',
+  'icon-maskable-512.png',
+  'apple-touch-icon.png',
+  ...BUILD_ASSETS,
   // Public data snapshots (NASA and NOAA archives)
   'data/donki.json',
   'data/noaa_kp.json',
@@ -82,9 +93,9 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(async () => {
-          const cached = await caches.match(request);
+          const cached = await caches.match(request, MATCH);
           if (cached) return cached;
-          const fallback = await caches.match('./') || await caches.match('index.html');
+          const fallback = await caches.match('./', MATCH) || await caches.match('index.html', MATCH);
           return fallback || new Response('Offline', { status: 503, statusText: 'Offline' });
         })
     );
@@ -94,7 +105,7 @@ self.addEventListener('fetch', (event) => {
   // 2. Data snapshots (/data/*.json): Stale-while-revalidate / Cache first
   if (url.pathname.includes('/data/') && url.pathname.endsWith('.json')) {
     event.respondWith(
-      caches.match(request).then((cached) => {
+      caches.match(request, MATCH).then((cached) => {
         const fetchPromise = fetch(request)
           .then((networkResponse) => {
             if (networkResponse.ok) {
@@ -114,7 +125,7 @@ self.addEventListener('fetch', (event) => {
 
   // 3. Static assets, fonts, art, scripts, styles: Cache first, network fallback
   event.respondWith(
-    caches.match(request).then((cached) => {
+    caches.match(request, MATCH).then((cached) => {
       if (cached) return cached;
 
       return fetch(request)
@@ -136,7 +147,7 @@ self.addEventListener('fetch', (event) => {
         .catch(() => {
           // If offline and request is an image, can return cached icon
           if (request.destination === 'image') {
-            return caches.match('icon.svg');
+            return caches.match('icon.svg', MATCH);
           }
           return new Response('Network error', { status: 408 });
         });
